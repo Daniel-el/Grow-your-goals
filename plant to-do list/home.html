@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- =========================
+     HEAD SECTION
+========================= -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grow Your Goals</title>
+
+  <!-- ======= GOOGLE FONT ======= -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+  <!-- =========================
+       INTERNAL CSS STYLES
+  ========================= -->
+  <style>
+    /* ========== General STYLES ========== */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #0d0d0d;
+      color: #ffa500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    /* ========== HEADER ========== */
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    /* ========== INPUT SECTION ========== */
+    #taskInput {
+      padding: 0.5rem;
+      border: none;
+      width: 100%;
+      max-width: 300px;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+      border-radius: 8px;
+    }
+
+    #addTaskBtn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: #ffa500;
+      color: #0d0d0d;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ========== TASK LIST ========== */
+    ul {
+      list-style-type: none;
+      padding: 0;
+      width: 100%;
+      max-width: 350px;
+      margin-top: 2rem;
+    }
+
+    li {
+      background-color: #1a1a1a;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+
+    li.completed {
+      background-color: #333;
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    /* ========== PLANT SECTION ========== */
+    .plant {
+      margin-top: 2rem;
+      width: 200px;
+      height: 200px;
+      background-color: #1a1a1a;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 16px;
+      border: 2px solid #ffa500;
+    }
+
+    /* ========== BUTTON CONTAINER ========== */
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .action-btn {
+      background: #ffa500;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      color: #0d0d0d;
+    }
+
+    /* ========== RESPONSIVE DESIGN ========== */
+    @media (min-width: 600px) {
+      .input-container {
+        flex-direction: row;
+      }
+    }
+  </style>
+</head>
+
+<!-- =========================
+     BODY SECTION
+========================= -->
+<body>
+
+  <!-- ======= TITLE ======= -->
+  <h1>Grow Your Goals 🌱</h1>
+
+  <!-- ======= INPUT AREA ======= -->
+  <div class="input-container">
+    <input type="text" id="taskInput" placeholder="Add a new task..." />
+    <button id="addTaskBtn">Add</button>
+  </div>
+
+  <!-- ======= TASK LIST ======= -->
+  <ul id="taskList"></ul>
+
+  <!-- ======= PLANT VISUAL ======= -->
+  <div class="plant" id="plant"></div>
+
+  <!-- ======= ACTION BUTTONS ======= -->
+  <div class="btn-container">
+    <button class="action-btn" onclick="endDay()">End Day</button>
+    <button class="action-btn" onclick="resetApp()">Reset</button>
+  </div>
+
+  <!-- =========================
+       JAVASCRIPT SECTION
+  ========================= -->
+  <script>
+    /* ========== Task ELEMENTS ========== */
+    const taskInput = document.getElementById("taskInput");
+    const addTaskBtn = document.getElementById("addTaskBtn");
+    const taskList = document.getElementById("taskList");
+    const plant = document.getElementById("plant");
+    let tasks = [];
+
+    /* ========== PLANT IMAGE PATHS ========== */
+    const plantImages = {
+      empty: "images/seed.png",      // Seed in soil
+      wilted: "images/bad.png",      // Poor growth
+      medium: "images/medium.png",   // Medium plant
+      full: "images/big.png"         // Beautiful full plant
+    };
+
+    /* ========== INITIAL PLANT IMAGE ========== */
+    plant.style.backgroundImage = `url('${plantImages.empty}')`;
+
+    /* ========== ADD TASK FUNCTIONALITY ========== */
+    addTaskBtn.addEventListener("click", () => {
+      const text = taskInput.value.trim();
+      if (text !== "") {
+        const task = { text, done: false };
+        tasks.push(task);
+        renderTasks();
+        taskInput.value = "";
+      }
+    });
+
+    /* ========== RENDER TASKS FUNCTION ========== */
+    function renderTasks() {
+      taskList.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+        li.textContent = task.text;
+        if (task.done) li.classList.add("completed");
+        li.addEventListener("click", () => {
+          task.done = !task.done;
+          renderTasks();
+        });
+        taskList.appendChild(li);
+      });
+    }
+
+    /* ========== END DAY FUNCTION ========== */
+    function endDay() {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.done).length;
+      if (total === 0) {
+        plant.style.backgroundImage = `url('${plantImages.empty}')`;
+        return;
+      }
+      const ratio = completed / total;
+      if (ratio === 1) {
+        plant.style.backgroundImage = `url('${plantImages.full}')`;
+      } else if (ratio >= 0.5) {
+        plant.style.backgroundImage = `url('${plantImages.medium}')`;
+      } else {
+        plant.style.backgroundImage = `url('${plantImages.wilted}')`;
+      }
+    }
+
+    /* ========== RESET FUNCTION ========== */
+    function resetApp() {
+      tasks = [];
+      renderTasks();
+      plant.style.backgroundImage = `url('${plantImages.empty}')`;
+    }
+  </script>
+  <footer>By Eric Daniel Langa[BIS]</footer>
+</body>
+</html>
